@@ -1,0 +1,15 @@
+/* ============================================================
+ * Tailwind v4 入口
+ * 与 app.scss 分开放置：Sass 无法解析 Tailwind 的 @import "tailwindcss"，
+ * 因此 Tailwind 走纯 CSS，自定义样式走 SCSS，由 styles/index.js 保证加载顺序。
+ * ============================================================ */
+@import 'tailwindcss';
+
+@theme {
+  --color-brand: #3b82f6;
+  --color-brand-dark: #2563eb;
+  --color-ink: #1f2937;
+  --color-ink-soft: #4b5563;
+  --color-ink-mute: #9ca3af;
+  --color-line: #e5e7eb;
+}

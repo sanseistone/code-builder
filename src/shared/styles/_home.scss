@@ -1,0 +1,99 @@
+// ============================================================
+// 首页：工具索引
+// ============================================================
+@use 'variables' as v;
+@use 'mixins' as m;
+
+.home {
+  min-height: 100vh;
+  padding: 3rem 1.5rem 4rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+}
+
+.home__inner {
+  max-width: 64rem;
+  margin: 0 auto;
+}
+
+.home__head {
+  margin-bottom: 2.5rem;
+  text-align: center;
+}
+
+.home__title {
+  margin: 0 0 0.75rem;
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: v.$ink;
+  letter-spacing: -0.025em;
+}
+
+.home__desc {
+  margin: 0;
+  font-size: 0.875rem;
+  color: v.$ink-soft;
+}
+
+.home__grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+}
+
+.home__card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem;
+  text-decoration: none;
+  background: v.$surface;
+  border: 1px solid v.$line;
+  border-radius: v.$radius-lg;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+
+  &:hover {
+    border-color: #93c5fd;
+    box-shadow: 0 10px 20px -8px rgba(59, 130, 246, 0.35);
+    transform: translateY(-2px);
+  }
+}
+
+.home__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  margin-bottom: 0.875rem;
+  font-size: 1.375rem;
+  background: v.$brand-soft;
+  border-radius: v.$radius;
+}
+
+.home__name {
+  margin: 0 0 0.375rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: v.$ink;
+}
+
+.home__summary {
+  flex: 1 1 auto;
+  margin: 0 0 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: v.$ink-soft;
+}
+
+.home__cta {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: v.$brand;
+}
+
+.home__foot {
+  margin-top: 3rem;
+  font-size: 0.75rem;
+  color: v.$ink-mute;
+  text-align: center;
+}

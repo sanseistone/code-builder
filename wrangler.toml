@@ -1,0 +1,19 @@
+# ============================================================
+# Cloudflare Workers 配置（静态资源 + Worker）
+# 部署：npm run deploy
+# 本地预览：npm run cf:dev
+# ============================================================
+name = "html-tools"
+compatibility_date = "2025-01-01"
+main = "worker/index.js"
+
+# dist/ 由 `npm run build` 产出，作为静态资源上传到 Workers
+[assets]
+directory = "dist"
+binding = "ASSETS"
+# /tools/blog 自动补斜杠并命中 /tools/blog/index.html
+html_handling = "auto-trailing-slash"
+
+# 敏感信息（如需）用 secrets 注入，不要写进配置文件
+# [vars]
+# EXAMPLE = "value"

@@ -1,0 +1,67 @@
+// ============================================================
+// 通用 mixin：把重复出现的样式组合收敛成一处
+// ============================================================
+@use 'variables' as v;
+
+// 面板卡片：白底 + 描边 + 圆角
+@mixin panel($pad: 0.75rem) {
+  padding: $pad;
+  background: v.$surface;
+  border: 1px solid v.$line;
+  border-radius: v.$radius-lg;
+}
+
+// 虚线占位区（空状态 / 添加区块的容器）
+@mixin dashed-zone($color: #bfdbfe, $bg: rgba(239, 246, 255, 0.4)) {
+  padding: 0.75rem;
+  background: $bg;
+  border: 2px dashed $color;
+  border-radius: v.$radius-lg;
+}
+
+// 小号按钮的基础外观（描边 / 圆角 / 状态），尺寸由 .btn 及其 --sm/--xs 决定
+@mixin chip-button {
+  color: v.$ink-soft;
+  white-space: nowrap;
+  background: v.$surface;
+  border: 1px solid v.$line;
+  border-radius: v.$radius-sm;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: v.$surface-sunken;
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+// 表单控件基础外观
+@mixin field {
+  width: 100%;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  color: v.$ink;
+  background: v.$surface;
+  border: 1px solid v.$line;
+  border-radius: v.$radius-sm;
+  outline: none;
+
+  &::placeholder {
+    color: v.$ink-mute;
+  }
+
+  &:focus {
+    border-color: #93c5fd;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  }
+}
+
+// 可滚动容器（编辑区 / 代码区）
+@mixin scroll-y {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}

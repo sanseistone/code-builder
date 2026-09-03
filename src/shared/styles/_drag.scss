@@ -1,0 +1,30 @@
+// ============================================================
+// 拖拽层：拖拽排序时的视觉反馈
+// 由 DragList 组件在 dragover / dragstart 时挂载这些 class
+// ============================================================
+@use 'variables' as v;
+
+// 落点在目标元素上半 → 顶部高亮
+.drag-over-before {
+  box-shadow: inset 0 3px 0 0 v.$brand;
+}
+
+// 落点在目标元素下半 → 底部高亮
+.drag-over-after {
+  box-shadow: inset 0 -3px 0 0 v.$brand;
+}
+
+// 正在被拖动的元素
+.drag-dragging {
+  opacity: 0.4;
+}
+
+// 拖拽手柄
+.drag-handle {
+  cursor: grab;
+  user-select: none;
+
+  &:active {
+    cursor: grabbing;
+  }
+}

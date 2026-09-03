@@ -1,0 +1,71 @@
+// ============================================================
+// 基础层：全局重置与版面骨架
+// ============================================================
+@use 'variables' as v;
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans',
+    'Noto Sans CJK JP', sans-serif;
+  color: v.$ink;
+  background: v.$surface-sunken;
+  -webkit-font-smoothing: antialiased;
+}
+
+// 全站统一细滚动条（编辑区 / 代码区滚动时观感一致）
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+// 工具页根容器：撑满视口，头部固定、主体自适应
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.app-shell__body {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+// 左侧编辑区
+.app-shell__aside {
+  flex: 0 0 auto;
+  width: v.$editor-w;
+  overflow-y: auto;
+  background: v.$surface;
+  border-right: 1px solid v.$line;
+}
+
+.app-shell__main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
