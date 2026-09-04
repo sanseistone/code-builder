@@ -28,7 +28,7 @@
 │   └── tools/
 │       ├── blog/               # 文章模板生成工具
 │       └── campaign/           # 活动页模板生成工具
-├── public/vendor/              # 预览区运行时（Tailwind 浏览器版）
+├── public/vendor/              # 预览区运行时（Tailwind 浏览器版，campaign 预览用）
 ├── worker/index.js             # Cloudflare Worker（静态资源托管 + 缓存头）
 ├── test/                       # 单元测试
 └── _archive/                   # 合并前的两个旧项目（验证无误后可删除）
@@ -94,3 +94,12 @@ npm run cf:dev         # 本地以 Workers 环境预览
 - 预览用 `PreviewPane`：它会在注入 iframe 前补一个 `<base href>`，
   让文档里的 `vendor/...` 等相对路径正确指回站点根。
   生成器保持纯函数、只输出相对路径，不要在里面写死绝对 URL
+- 文章工具的产出代码自带一份普通 CSS：视觉全部由 `.article-*` 语义类表达，
+  规则手写在 `src/tools/blog/article-style.js`（`ARTICLE_CSS`），生成时内联到
+  代码开头的 `<style>`。自包含、零依赖：
+  - 不需要站点带 Tailwind / Bootstrap，也不需要执行 JS / 上传文件 ——
+    OpenCart 这类会过滤 `<script>` 的 CMS 后台也适用
+  - 无 `@layer` 的普通规则优先级最高，不会被站点样式冲掉；
+    `.article-*` 命名空间也只影响文章内容，不和站点全局类（.btn / .title 等）撞车
+- 改样式只需编辑 `article-style.js`，无需跑任何编译步骤
+  （`npm run article-css` 已移除）

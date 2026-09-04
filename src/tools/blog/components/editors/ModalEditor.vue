@@ -1,5 +1,5 @@
 <script setup>
-// PDF 弹窗编辑器：触发按钮 + Bootstrap modal 结构
+// PDF 弹窗编辑器：触发按钮 + Bootstrap modal 结构钩子（视觉走文章自带的固定样式）
 defineProps({ model: { type: Object, required: true } })
 
 const SIZES = ['modal-xl', 'modal-lg', 'modal-sm', '']
@@ -19,15 +19,6 @@ const SIZE_LABEL = {
         v-model="model.btnText"
         type="text"
         placeholder="按钮文字（如：取扱説明書（PDF））"
-        class="min-w-0 flex-1 rounded border border-gray-200 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-200"
-      />
-    </div>
-    <div class="flex items-center gap-2">
-      <span class="w-14 shrink-0 text-[11px] text-gray-500">按钮类名</span>
-      <input
-        v-model="model.btnClass"
-        type="text"
-        placeholder="btn btn-primary"
         class="min-w-0 flex-1 rounded border border-gray-200 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-200"
       />
     </div>
@@ -65,7 +56,7 @@ const SIZE_LABEL = {
       </select>
     </div>
     <p class="text-[10px] leading-relaxed text-gray-400">
-      触发依赖站点全局函数 <code>showModalById('{{ model.modalId || 'pdfModal' }}')</code>，预览面板已内置等价实现可直接点开验证。
+      触发依赖站点全局函数 <code>showModalById('{{ model.modalId || 'pdfModal' }}')</code>（后台模板脚本），预览面板已内置等价实现可直接点开验证。按钮与弹窗视觉由代码开头的内联样式提供，不依赖站点 Bootstrap。
     </p>
   </div>
 </template>

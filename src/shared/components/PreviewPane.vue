@@ -26,7 +26,8 @@ const props = defineProps({
   // 下载文件名：字符串，或根据 source 计算的函数
   fileName: { type: [String, Function], default: 'template' },
 })
-const emit = defineEmits(['toast'])
+// select-block：预览中被点击的区块 uid（用于左侧编辑区反向定位）
+const emit = defineEmits(['toast', 'select-block'])
 
 const tab = ref('preview')
 const previewDoc = ref('')
@@ -62,14 +63,36 @@ function focusBlock(uid) {
   postFocus(uid)
 }
 
+// 常驻高亮的区块：与左侧编辑区的激活态一致，预览重载后要补发
+let activeUid = ''
+
+function postActive(uid) {
+  const win = readFrameWindow()
+  if (win) win.postMessage({ type: 'preview:set-active', uid: uid || '' }, '*')
+}
+
+// 供父级调用：把「当前正在编辑的区块」同步到预览，持续高亮
+function setActiveBlock(uid) {
+  activeUid = uid || ''
+  postActive(activeUid)
+}
+
 // srcdoc 变化会触发 load。若高亮请求恰在重载期间发出（例如刚新增区块、预览尚未渲染），在此补发
 function onFrameLoad() {
+  restoreScrollY()
+  if (activeUid) postActive(activeUid)
   if (pendingUid && Date.now() - pendingAt < FOCUS_WINDOW) postFocus(pendingUid)
 }
 
 function onMessage(e) {
   const d = e.data
-  if (!d || d.type !== 'preview:focus-result' || d.uid !== pendingUid) return
+  if (!d) return
+  // 点击预览里的区块 → 交给工具页把左侧编辑区滚到对应卡片
+  if (d.type === 'preview:select-block' && d.uid) {
+    emit('select-block', d.uid)
+    return
+  }
+  if (d.type !== 'preview:focus-result' || d.uid !== pendingUid) return
   if (d.found) {
     pendingUid = ''
     return
@@ -85,10 +108,39 @@ function onMessage(e) {
 onMounted(() => window.addEventListener('message', onMessage))
 onBeforeUnmount(() => window.removeEventListener('message', onMessage))
 
-defineExpose({ focusBlock })
+defineExpose({ focusBlock, setActiveBlock })
+
+// ---------- 预览重建时保持滚动位置 ----------
+// srcdoc 一变，iframe 就是一次整页重载，滚动位置会归零 ——
+// 表现为「刚编辑两下，预览就跳回顶部的目次」。
+// 因此重建前记下 scrollY，加载完成后还原。
+// 主动定位（focusBlock）后预览已滚到目标区块，此时记下的是目标位置，
+// 还原同样正确；若定位请求仍在窗口期内，onFrameLoad 会先还原、再补发定位。
+let savedScrollY = null
+
+function readFrameWindow() {
+  return frame.value && frame.value.contentWindow
+}
+
+function saveScrollY() {
+  const win = readFrameWindow()
+  savedScrollY = win ? win.scrollY : null
+}
+
+function restoreScrollY() {
+  if (savedScrollY == null) return
+  const y = savedScrollY
+  savedScrollY = null
+  const win = readFrameWindow()
+  if (!win) return
+  win.scrollTo(0, y)
+  // 运行时 Tailwind 注入样式后文档高度会变，下一帧再校正一次
+  if (win.requestAnimationFrame) win.requestAnimationFrame(() => win.scrollTo(0, y))
+}
 
 let timer = null
 function update() {
+  saveScrollY()
   previewDoc.value = props.generatePreviewDoc(props.source)
   code.value = props.generateHtml(props.source)
 }

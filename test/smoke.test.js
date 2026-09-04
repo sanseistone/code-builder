@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import HomeView from '../src/HomeView.vue'
 import BlogApp from '../src/tools/blog/App.vue'
@@ -61,6 +61,47 @@ describe('共享预览面板', () => {
     )
     // 生成器的原始输出不应被改写（只有注入 iframe 时会补 base）
     expect(previewDoc).not.toContain('<base href=')
+  })
+
+  // srcdoc 一变就是一次整页重载，滚动位置会归零。
+  // 目次在文档最前面，位置一归零看起来就是「编辑时跳回目录」。
+  it('因编辑而重建预览时保持滚动位置', async () => {
+    const wrapper = mount(PreviewPane, {
+      props: {
+        source: { n: 1 },
+        generatePreviewDoc: (s) => `<html><head></head><body>v${s.n}</body></html>`,
+        generateHtml: () => '<p>x</p>',
+      },
+    })
+    await new Promise((r) => setTimeout(r, 300)) // 等首次 update()
+
+    // jsdom 不会真的载入 iframe 内容，这里给 contentWindow 打桩
+    const frame = wrapper.find('iframe').element
+    const fakeWin = { scrollY: 320, scrollTo: vi.fn() }
+    Object.defineProperty(frame, 'contentWindow', { get: () => fakeWin, configurable: true })
+
+    // 模拟编辑：source 变化 → 防抖后重建 srcdoc → iframe 重载
+    await wrapper.setProps({ source: { n: 2 } })
+    await new Promise((r) => setTimeout(r, 300))
+    await wrapper.find('iframe').trigger('load')
+
+    expect(fakeWin.scrollTo).toHaveBeenCalledWith(0, 320)
+  })
+
+  it('预览里点击区块时会向工具页抛出 select-block', async () => {
+    const wrapper = mount(PreviewPane, {
+      props: {
+        source: {},
+        generatePreviewDoc: () => '<html><head></head><body></body></html>',
+        generateHtml: () => '<p>x</p>',
+      },
+    })
+    await new Promise((r) => setTimeout(r, 300))
+
+    window.postMessage({ type: 'preview:select-block', uid: 'sec-1' }, '*')
+    await new Promise((r) => setTimeout(r, 10)) // postMessage 是异步派发的
+
+    expect(wrapper.emitted('select-block')).toEqual([['sec-1']])
   })
 })
 

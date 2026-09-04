@@ -32,7 +32,10 @@ export function usePersistentState(storageKey, createDefault, normalize = (x) =>
     saveJson(storageKey, state.value)
   }
 
+  // 必须同时清掉挂起的防抖保存，否则清完又被 watch 写回去，重置会失效
   function clearStorage() {
+    clearTimeout(timer)
+    timer = null
     removeKey(storageKey)
   }
 

@@ -1,0 +1,13 @@
+# Cloudflare Pages / Netlify 等静态托管的响应头规则
+# Workers 部署走 worker/index.js，这里的规则对其无效但无害
+
+# 带 hash 的构建产物可长期缓存
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML 不缓存，保证发版后立刻生效
+/*.html
+  Cache-Control: no-cache
+
+/*
+  X-Content-Type-Options: nosniff

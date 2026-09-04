@@ -1,5 +1,5 @@
 <script setup>
-// 章节字段编辑器（标题 / 锚点 id / 级别 / 目次开关）
+// 章节字段编辑器（标题 / 加粗 / 锚点 id / 级别 / 目次开关）
 defineProps({ model: { type: Object, required: true } })
 </script>
 
@@ -20,6 +20,13 @@ defineProps({ model: { type: Object, required: true } })
         <option :value="2">H2</option>
         <option :value="3">H3</option>
       </select>
+      <label
+        class="flex shrink-0 items-center gap-1 text-[11px] text-gray-500"
+        title="标题是否加粗输出（标题文字里无需再写 **…**）"
+      >
+        <input v-model="model.bold" type="checkbox" class="accent-rose-500" />
+        加粗
+      </label>
     </div>
     <div class="flex items-center gap-2">
       <input

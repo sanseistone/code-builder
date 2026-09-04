@@ -5,6 +5,11 @@
  * ============================================================ */
 @import 'tailwindcss';
 
+/* 生成器里的 Tailwind 类名属于「产出代码」，与工具自身界面无关，
+   不参与本站 CSS 打包，避免产物里混入用不到的样式 */
+@source not "../../tools/blog/generator.js";
+@source not "../../tools/campaign/generator.js";
+
 @theme {
   --color-brand: #3b82f6;
   --color-brand-dark: #2563eb;

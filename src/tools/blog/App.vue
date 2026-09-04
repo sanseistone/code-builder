@@ -7,7 +7,7 @@
 // 页面骨架、Toast、导入导出、本地自动保存、预览面板均来自共享层，
 // 这里只保留文章工具自身的业务逻辑。
 // ============================================================
-import { ref, provide, onMounted } from 'vue'
+import { ref, provide, watch, onMounted, onBeforeUnmount } from 'vue'
 import {
   ToolShell,
   PreviewPane,
@@ -24,20 +24,52 @@ import BlockCard from './components/BlockCard.vue'
 import TocEditor from './components/TocEditor.vue'
 
 const STORAGE_KEY = 'article-template-doc'
+const TEMPLATE_KEY = 'article-template-id'
 
 // toastMsg 供模板绑定，toast 是显示提示的函数
 const { message: toastMsg, show: toast } = useToast()
 
 // ---------- 状态（含本地自动保存 / 恢复）----------
-const templateId = ref(TEMPLATES[0].id)
+// 当前选中的模板也要一起存档：只存文档的话，刷新后内容恢复了、
+// 顶部的模板下拉却回到列表第一项，看起来就像「选错模板」。
+const {
+  state: templateId,
+  restore: restoreTemplateId,
+  clearStorage: clearTemplateId,
+} = usePersistentState(TEMPLATE_KEY, () => TEMPLATES[0].id)
 const { state: doc, restore, clearStorage } = usePersistentState(
   STORAGE_KEY,
   () => makeTemplate(TEMPLATES[0].id),
   normalizeDoc
 )
 
+// 内容指纹：忽略 uid（每次创建区块都会变），只比对真实内容
+function fingerprint(d) {
+  return JSON.stringify(d, (key, value) => (key === 'uid' ? undefined : value))
+}
+
 onMounted(() => {
-  if (restore()) toast('已恢复上次的编辑内容')
+  const hadTemplate = restoreTemplateId()
+  const hadDoc = restore()
+
+  if (!hadDoc) {
+    // 只有模板记录、没有文档（极少见）：按记录重建，避免两者各说各话
+    if (hadTemplate && templateId.value !== TEMPLATES[0].id && TEMPLATES.some((t) => t.id === templateId.value)) {
+      doc.value = makeTemplate(templateId.value)
+    }
+    return
+  }
+
+  toast('已恢复上次的编辑内容')
+  // 自模板加载后内容被改过 → 归到「当前自定义内容」，别再显示原模板名。
+  // 两边都过一遍 normalizeDoc，保证字段与键顺序一致，比较才有意义。
+  const id = templateId.value
+  const pristine = TEMPLATES.some((t) => t.id === id)
+    ? fingerprint(normalizeDoc(makeTemplate(id)))
+    : null
+  if (pristine !== null && fingerprint(doc.value) !== pristine) {
+    templateId.value = 'custom'
+  }
 })
 
 // ---------- 模板 ----------
@@ -75,15 +107,20 @@ const { exportConfig, importConfig } = useImportExport({
 })
 
 function resetAll() {
-  doc.value = makeTemplate(templateId.value === 'custom' ? 'blank' : templateId.value)
-  templateId.value = 'blank'
+  // 先清存档（会一并取消挂起的防抖保存），再重置界面，避免重置后又被写回
   clearStorage()
+  clearTemplateId()
+  templateId.value = 'blank'
+  doc.value = makeTemplate('blank')
   toast('已重置为空白模板')
 }
 
 // ---------- 编辑区 ↔ 预览联动 ----------
 // 区块卡片可递归嵌套（章节内含子区块），用 provide/inject 让任意深度的卡片
 // 都能直接通知预览滚动定位，无需层层 emit。
+//
+// 两个工具共用：点击卡片头部、聚焦字段都会定位到预览对应区块。
+// 预览因编辑而重建时，PreviewPane 会自己保持滚动位置，不会跳回顶部。
 const previewRef = ref(null)
 const activeUid = ref('') // 当前正在编辑的区块，用于左侧卡片高亮
 
@@ -94,6 +131,59 @@ function focusBlock(uid) {
 
 provide('focusBlock', focusBlock)
 provide('activeUid', activeUid)
+
+// 激活态同步到预览：左侧正在编辑的区块，在预览里也保持常驻高亮边框
+watch(activeUid, (uid) => previewRef.value?.setActiveBlock(uid))
+
+// ---------- 预览 → 编辑区（反向联动）----------
+// 点预览里的某个区块时，把左侧编辑区滚到对应卡片。
+// 卡片挂载时把自己的根元素登记进这里，定位时直接查表，不必递归组件树。
+const cardEls = new Map() // uid → 卡片根元素
+provide('cardRegistry', cardEls)
+
+// 滚动到位后再闪一下，给出「就是这一块」的即时反馈
+const flashUid = ref('')
+provide('flashUid', flashUid)
+
+/** 向上找第一个可滚动的祖先（左侧编辑面板） */
+function scrollableAncestor(el) {
+  let node = el.parentElement
+  while (node) {
+    const overflowY = getComputedStyle(node).overflowY
+    if (overflowY === 'auto' || overflowY === 'scroll') return node
+    node = node.parentElement
+  }
+  return null
+}
+
+// 整章卡片常常比可视区还高，此时居中滚动会把章节标题顶出视口，
+// 看起来就像只定位到了标题。所以：装得下就居中，装不下就对齐顶部，
+// 从章节标题开始，能连着看到下面的内容。
+function scrollCardIntoView(el) {
+  const container = scrollableAncestor(el)
+  if (!container || el.offsetHeight <= container.clientHeight) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    return
+  }
+  const top =
+    el.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop
+  container.scrollTo({ top: Math.max(top - 12, 0), behavior: 'smooth' })
+}
+
+let flashTimer = null
+function selectBlockFromPreview(uid) {
+  if (!uid) return
+  activeUid.value = uid // 只记激活态：预览本来就停在那儿，不必再滚一次
+  const el = cardEls.get(uid)
+  if (el) scrollCardIntoView(el)
+  flashUid.value = uid
+  clearTimeout(flashTimer)
+  flashTimer = setTimeout(() => {
+    flashUid.value = ''
+  }, 1200)
+}
+
+onBeforeUnmount(() => clearTimeout(flashTimer))
 </script>
 
 <template>
@@ -129,14 +219,10 @@ provide('activeUid', activeUid)
               placeholder="文章标题（用于下载文件名，不输出到代码）"
               class="field min-w-0 flex-1"
             />
-            <label
-              class="flex shrink-0 items-center gap-1 text-[11px] text-gray-500"
-              title="生成的代码顶部是否附带全局样式"
-            >
-              <input v-model="doc.includeStyle" type="checkbox" class="accent-blue-500" />
-              输出 &lt;style&gt;
-            </label>
           </div>
+          <p class="mt-1.5 text-[10px] leading-relaxed text-gray-400">
+            产出代码开头自带一段内联样式（普通 CSS，.article-* 前缀，只作用于本文内容），自包含、零依赖，直接粘到站点即可生效。
+          </p>
         </section>
 
         <!-- 目次 -->
@@ -186,6 +272,7 @@ provide('activeUid', activeUid)
       :generate-html="generateHtml"
       :file-name="(d) => d.title || 'article'"
       @toast="toast"
+      @select-block="selectBlockFromPreview"
     />
   </ToolShell>
 </template>

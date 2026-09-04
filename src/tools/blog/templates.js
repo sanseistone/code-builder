@@ -12,7 +12,7 @@ import {
 
 // ============================================================
 // 内置模板
-// 结构: doc = { title, includeStyle, toc, blocks[] }
+// 结构: doc = { title, toc, blocks[] }（样式固定内联，见 generator.js）
 // 区块内文本支持行内标记：
 //   **粗体**   __下划线__   ==高亮==   [文字](链接)
 //   换行 → <br>
@@ -22,7 +22,6 @@ import {
 function kumaDisposalTemplate() {
   return createDoc({
     title: 'ラブドール 処分 方法',
-    includeStyle: true,
     toc: { enabled: true, title: '目次', mode: 'auto', items: [] },
     blocks: [
       createImage({
@@ -176,7 +175,6 @@ function kumaDisposalTemplate() {
 function ironaiTemplate() {
   return createDoc({
     title: 'IronAI Bionic VaginaX とは',
-    includeStyle: true,
     toc: { enabled: true, title: '目次', mode: 'auto', items: [] },
     blocks: [
       createImage({
@@ -199,7 +197,8 @@ function ironaiTemplate() {
       createSection({
         id: 'item1',
         level: 2,
-        title: '**IronAI Bionic VaginaXとは？**',
+        title: 'IronAI Bionic VaginaXとは？',
+        bold: true,
         children: [
           createParagraph({
             text: 'IronAI Bionic VaginaXは、Irontech Dollが開発したセンサー連動型のインタラクティブシステムです。',
@@ -229,7 +228,8 @@ function ironaiTemplate() {
       createSection({
         id: 'item2',
         level: 2,
-        title: '**従来の電動機能との違い**',
+        title: '従来の電動機能との違い',
+        bold: true,
         children: [
           createParagraph({ text: '従来型の電動機能ラブドールでは、' }),
           createParagraph({ text: '「温感機能をONにする」' }),
@@ -257,7 +257,8 @@ function ironaiTemplate() {
       createSection({
         id: 'item3',
         level: 2,
-        title: '**IronAI CoreAIとの接続**',
+        title: 'IronAI CoreAIとの接続',
+        bold: true,
         children: [
           createParagraph({
             text: 'Bionic VaginaXを理解するうえで重要なのが、「IronAI CoreAI」です。',
@@ -282,7 +283,8 @@ function ironaiTemplate() {
       createSection({
         id: 'item4',
         level: 2,
-        title: '**Bionic VaginaXの主な機能**',
+        title: 'Bionic VaginaXの主な機能',
+        bold: true,
         children: [
           createImage({
             src: '/image/cup/2026/09/01/6a967f0801448.webp',
@@ -334,7 +336,8 @@ function ironaiTemplate() {
       createSection({
         id: 'item5',
         level: 2,
-        title: '**Dollia Appで好みに合わせて調整可能**',
+        title: 'Dollia Appで好みに合わせて調整可能',
+        bold: true,
         children: [
           createParagraph({
             text: '自動レスポンスだけではなく、ユーザー自身で設定を変更できることもBionic VaginaXの特徴です。',
@@ -355,7 +358,8 @@ function ironaiTemplate() {
       createSection({
         id: 'item6',
         level: 2,
-        title: '**使用開始までの流れ**',
+        title: '使用開始までの流れ',
+        bold: true,
         children: [
           createParagraph({
             text: 'Irontech Dollが案内している基本的なセットアップは比較的シンプルです。',
@@ -372,7 +376,6 @@ function ironaiTemplate() {
           }),
           createModal({
             modalId: 'pdfModal',
-            btnClass: 'btn btn-primary',
             btnText: 'IronAI Bionic VaginaXの取扱説明書（PDF）',
             title: 'IronAI Bionic VaginaXの取扱説明書（PDF）',
             src: 'https://www.kuma-doll.com/image/blog/ironai-bionic-vaginax.pdf',
@@ -384,7 +387,8 @@ function ironaiTemplate() {
       createSection({
         id: 'item7',
         level: 3,
-        title: '**使用前に確認しておきたいポイント**',
+        title: '使用前に確認しておきたいポイント',
+        bold: true,
         children: [
           createParagraph({ text: '**Bionic VaginaXを利用するにはIronAI CoreAIが必要です。**' }),
           createParagraph({
@@ -422,7 +426,8 @@ function ironaiTemplate() {
       createSection({
         id: 'item8',
         level: 3,
-        title: '**IronAIが目指している「次世代ラブドール」とは？**',
+        title: 'IronAIが目指している「次世代ラブドール」とは？',
+        bold: true,
         children: [
           createParagraph({
             text: '**Bionic VaginaXで注目したいのは、個々の機能以上にラブドールの電動機能に対する考え方が変わり始めていることです。**',
@@ -447,7 +452,8 @@ function ironaiTemplate() {
       createSection({
         id: 'item9',
         level: 3,
-        title: '**よくある質問**',
+        title: 'よくある質問',
+        bold: true,
         children: [
           createParagraph({ text: '**Q. Bionic VaginaXだけで使用できますか？**' }),
           createParagraph({
@@ -476,7 +482,8 @@ function ironaiTemplate() {
       createSection({
         id: 'item10',
         level: 3,
-        title: '**まとめ**',
+        title: 'まとめ',
+        bold: true,
         children: [
           createParagraph({
             text: 'Irontech DollのIronAI Bionic VaginaXは、従来のように温感・振動などを個別に動作させるだけではなく、**センサーによる検知とIronAI CoreAIによる制御を組み合わせ、使用状況に応じて複数の機能を連動させる**システムです。',
@@ -541,7 +548,6 @@ function ironaiTemplate() {
 function blankTemplate() {
   return createDoc({
     title: '新規記事',
-    includeStyle: true,
     toc: { enabled: true, title: '目次', mode: 'auto', items: [] },
     blocks: [
       createImage({

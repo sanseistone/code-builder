@@ -8,7 +8,7 @@ export default { name: 'BlockCard' }
 // 区块卡片：拖拽把手 + 类型标识 + 工具按钮 + 对应编辑器
 // section 类型在此直接渲染子区块列表（组件自引用实现递归嵌套）
 // ============================================================
-import { computed, inject } from 'vue'
+import { computed, inject, onMounted, onBeforeUnmount, ref } from 'vue'
 import {
   BLOCK_META,
   TONE_CLASS,
@@ -61,10 +61,25 @@ const editor = computed(() => EDITOR_MAP[props.block.type])
 const isSection = computed(() => props.block.type === 'section')
 
 // ---------- 编辑区 ↔ 预览联动 ----------
-// 由 App.vue 注入：点击卡片或聚焦字段时，通知右侧预览滚动到对应区块并高亮
+// 由 App.vue 注入：点击卡片头部或聚焦字段时，通知右侧预览滚动到对应区块并高亮
 const focusBlock = inject('focusBlock', null)
 const activeUid = inject('activeUid', null)
 const isActive = computed(() => !!activeUid && activeUid.value === props.block.uid)
+
+// 由 App.vue 注入：从预览反向定位时要闪烁提示的区块
+const flashUid = inject('flashUid', null)
+const isFlashing = computed(() => !!flashUid && flashUid.value === props.block.uid)
+
+// 登记卡片根元素，供「点预览 → 滚动到左侧卡片」直接查表定位
+const rootEl = ref(null)
+const cardRegistry = inject('cardRegistry', null)
+
+onMounted(() => {
+  if (cardRegistry && rootEl.value) cardRegistry.set(props.block.uid, rootEl.value)
+})
+onBeforeUnmount(() => {
+  if (cardRegistry) cardRegistry.delete(props.block.uid)
+})
 
 function activate() {
   if (focusBlock) focusBlock(props.block.uid)
@@ -104,8 +119,13 @@ function onDuplicate() {
 
 <template>
   <div
-    class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-shadow"
-    :class="[tone.bar, isActive ? 'ring-2 ring-blue-400' : '']"
+    ref="rootEl"
+    class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition"
+    :class="[
+      tone.bar,
+      isActive ? 'ring-2 ring-blue-400' : '',
+      isFlashing ? 'bg-blue-50 ring-4 ring-blue-500' : '',
+    ]"
     style="border-left-width: 4px; border-left-style: solid;"
     @focusin="onFocusIn"
   >

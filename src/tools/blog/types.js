@@ -2,15 +2,17 @@
 // 文章数据模型：区块类型定义与工厂函数
 //
 // 文档结构 doc = {
-//   title           文章标题（仅用于编辑器识别，不输出）
-//   includeStyle    是否输出 <style> 样式块
-//   toc             { enabled, title, mode: auto|manual, items: [{id,text}] }
+//   title            文章标题（仅用于编辑器识别，不输出）
+//   toc              { enabled, title, mode: auto|manual, items: [{id,text}] }
 //   blocks          [ 顶层区块 ]
 // }
 //
+// 样式说明：生成代码开头恒内联一份普通 CSS（.article-* 语义类，见
+// article-style.js），自包含、无外部依赖，粘到任何页面即可生效。
+//
 // 区块（可拖拽排序，两级嵌套）：
 //   section    章节容器 H2/H3，内部 children 可再放任意非 section 区块
-//   subheading 独立子标题 H3
+//   subheading 独立子标题，输出标签可选（SUBHEADING_TAGS，默认 h3）
 //   paragraph  正文段落（支持 **粗体** __下划线__ ==高亮__ [文字](链接)）
 //   image      图片（可切换头图 article-banner 模式 / 段落内包裹）
 //   list       列表（有序 / 无序）
@@ -25,7 +27,7 @@
 // 各区块的展示元信息：name = 中文名，tone = 主题色（tailwind 色板名），container = 是否可嵌套子区块
 export const BLOCK_META = {
   section: { name: '章节（H2/H3）', tone: 'rose', container: true },
-  subheading: { name: '子标题（H3）', tone: 'orange' },
+  subheading: { name: '子标题', tone: 'orange' },
   paragraph: { name: '正文段落', tone: 'slate' },
   image: { name: '图片 / 头图', tone: 'sky' },
   video: { name: '视频', tone: 'indigo' },
@@ -72,6 +74,7 @@ export function createSection(over = {}) {
     id: 'item1', // 目次锚点 id
     level: 2, // 2 → <h2>；3 → <h3>
     title: '',
+    bold: false, // 标题是否加粗（由编辑器勾选，不在标题文字里写 **…**）
     showBackToToc: true, // 是否显示「↑ 目次へ」
     inToc: true, // 是否进入目次列表
     children: [],
@@ -79,8 +82,11 @@ export function createSection(over = {}) {
   }
 }
 
+// 子标题允许输出的标签。生成器只认这张表里的值，避免用户数据被当成标签注入
+export const SUBHEADING_TAGS = ['h2', 'h3', 'h4', 'p', 'div']
+
 export function createSubheading(over = {}) {
-  return { type: 'subheading', uid: uid('sub'), text: '', ...over }
+  return { type: 'subheading', uid: uid('sub'), text: '', tag: 'h3', ...over }
 }
 
 export function createParagraph(over = {}) {
@@ -133,11 +139,10 @@ export function createModal(over = {}) {
     type: 'modal',
     uid: uid('mdl'),
     modalId: 'pdfModal', // 弹窗 DOM id，同时作为 showModalById 的参数
-    btnText: '', // 触发按钮文字
-    btnClass: 'btn btn-primary',
+    btnText: '', // 触发按钮文字（视觉走固定 .article-* 类，不再依赖 Bootstrap）
     title: '', // 弹窗标题
     src: '', // PDF / iframe 地址
-    size: 'modal-xl', // modal-sm / modal-lg / modal-xl
+    size: 'modal-xl', // modal-sm / modal-lg / modal-xl（Bootstrap 结构钩子，宽度由文章样式提供）
     ...over,
   }
 }
@@ -225,7 +230,6 @@ export function createBlock(type) {
 export function createDoc(over = {}) {
   return {
     title: '新規記事',
-    includeStyle: true,
     toc: {
       enabled: true,
       title: '目次',
