@@ -59,9 +59,3 @@
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
   }
 }
-
-// 可滚动容器（编辑区 / 代码区）
-@mixin scroll-y {
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}

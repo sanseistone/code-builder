@@ -47,18 +47,7 @@ export function createNoteBlock(over = {}) {
   return { type: 'note', bold: false, lines: [''], ...over }
 }
 
-// 模块中文名（用于 UI 展示）
-export const MODULE_LABELS = {
-  header: '大标题',
-  note: '说明文字',
-  section: '小标题块',
-  tags: '标签组',
-  list: '价格列表',
-  date: '日期',
-  footerNote: '底部说明',
-  link: '链接',
-}
-
+// 子模块中文名（用于 UI 展示）
 export const CHILD_LABELS = {
   note: '说明文字',
   tags: '标签组',

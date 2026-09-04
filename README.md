@@ -30,8 +30,7 @@
 │       └── campaign/           # 活动页模板生成工具
 ├── public/vendor/              # 预览区运行时（Tailwind 浏览器版，campaign 预览用）
 ├── worker/index.js             # Cloudflare Worker（静态资源托管 + 缓存头）
-├── test/                       # 单元测试
-└── _archive/                   # 合并前的两个旧项目（验证无误后可删除）
+└── test/                       # 单元测试
 ```
 
 ## 常用命令

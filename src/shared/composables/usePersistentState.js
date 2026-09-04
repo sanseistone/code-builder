@@ -53,5 +53,5 @@ export function usePersistentState(storageKey, createDefault, normalize = (x) =>
     stop()
   })
 
-  return { state, restore, persistNow, clearStorage }
+  return { state, restore, clearStorage }
 }

@@ -17,7 +17,6 @@ const props = defineProps({
   cloneItem: { type: Function, default: duplicateItem },
   emptyText: { type: String, default: '暂无内容，点击下方按钮添加' },
 })
-const emit = defineEmits(['change'])
 
 // 本列表内的拖拽视觉状态（必须是响应式，否则拖拽过程中的插入指示线不会渲染）
 const dragIndex = ref(-1) // 正在被拖动的项
@@ -78,7 +77,6 @@ function onDrop(e, i) {
   dragIndex.value = -1
   hoverIndex.value = -1
   resetDnd()
-  emit('change')
 }
 
 // 从 from 移动到插入点 to（to 为插入位置，非目标索引）
@@ -89,7 +87,6 @@ function moveTo(from, to) {
   if (target === from || target < 0 || target > props.items.length) return
   const [it] = props.items.splice(from, 1)
   props.items.splice(target, 0, it)
-  emit('change')
 }
 
 // 上移 / 下移（dir = -1 | 1）
@@ -99,14 +96,12 @@ function moveBy(i, dir) {
 
 function removeAt(i) {
   props.items.splice(i, 1)
-  emit('change')
 }
 
 // 复制当前项并插入到其后，返回副本供调用方改写（如重分配章节 id）
 function duplicateAt(i) {
   const copy = props.cloneItem(props.items[i])
   props.items.splice(i + 1, 0, copy)
-  emit('change')
   return copy
 }
 

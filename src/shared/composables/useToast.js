@@ -11,20 +11,19 @@ export function useToast(duration = 1800) {
   const message = ref('')
   let timer = null
 
-  function show(msg) {
-    message.value = msg
-    clearTimeout(timer)
-    timer = setTimeout(() => {
-      message.value = ''
-    }, duration)
-  }
-
   function clear() {
     clearTimeout(timer)
     message.value = ''
   }
 
+  function show(msg) {
+    message.value = msg
+    clearTimeout(timer)
+    timer = setTimeout(clear, duration)
+  }
+
   onBeforeUnmount(clear)
 
-  return { message, show, clear }
+  // clear 只在组件卸载时内部使用，不对外暴露
+  return { message, show }
 }

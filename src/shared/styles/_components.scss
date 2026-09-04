@@ -72,14 +72,6 @@
   font-size: 0.875rem;
 }
 
-.field-label {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: v.$ink-soft;
-}
-
 // ---------------- 面板 ----------------
 .panel {
   @include m.panel;
@@ -221,15 +213,6 @@
     white-space: pre-wrap;
     word-break: break-all;
   }
-}
-
-.pane__empty {
-  display: flex;
-  flex: 1 1 auto;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  color: v.$ink-mute;
 }
 
 // ---------------- Toast ----------------

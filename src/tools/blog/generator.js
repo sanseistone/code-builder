@@ -41,9 +41,8 @@ const C = {
   underline: 'article-mark-underline',
   highlight: 'article-mark-highlight',
 
-  // 列表
-  ul: 'article-list',
-  ol: 'article-list',
+  // 列表（ul / ol 共用同一个类，靠标签本身区分有序 / 无序）
+  list: 'article-list',
 
   // 媒体（图片 / 视频统一为块级并预留与正文的间距）
   banner: 'article-banner',
@@ -234,7 +233,7 @@ function renderList(b, indent) {
   if (!items.length) return []
   const pad = ' '.repeat(indent)
   const tag = b.ordered ? 'ol' : 'ul'
-  const out = [`${pad}<${tag} class="${b.ordered ? C.ol : C.ul}">`]
+  const out = [`${pad}<${tag} class="${C.list}">`]
   for (const item of items) {
     out.push(`${pad}    <li>${inlineMultiline(item.text, pad + '    ')}</li>`)
   }
@@ -332,7 +331,7 @@ function renderSection(b, indent, index, opts) {
 }
 
 // 区块列表分发
-export function renderBlocks(blocks, indent = 4, opts) {
+function renderBlocks(blocks, indent = 4, opts) {
   const out = []
   let sectionIndex = 0
   for (const b of blocks || []) {
@@ -383,7 +382,7 @@ export function renderBlocks(blocks, indent = 4, opts) {
 // ---------- 目次 ----------
 
 // 解析最终生效的目次条目
-export function resolveTocItems(doc) {
+function resolveTocItems(doc) {
   if (!doc.toc || !doc.toc.enabled) return []
   if (doc.toc.mode === 'manual') {
     return (doc.toc.items || []).filter((i) => String(i.text).trim() !== '')
